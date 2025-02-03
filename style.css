@@ -1,0 +1,23 @@
+.svetlo-siv{
+    background-color:#C4DAD2;
+}
+
+.siv{
+    background-color: #6A9C89;
+}
+
+.temno-siv{
+    background-color: #16423C;
+}
+
+.crn{
+    background-color: #191818;
+}
+
+.srednje-siv{
+    background-color: #406f63;
+}
+
+li a:hover {
+    background-color: #629584;
+}
