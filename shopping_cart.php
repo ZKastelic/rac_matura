@@ -118,6 +118,7 @@ session_start();
 <div class="col-sm-2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam obcaecati maxime nihil dolorum perferendis odio dolores hic enim illo architecto laudantium sit quibusdam, quidem quod totam delectus. Laborum, harum explicabo!</div>
 <div class="col-sm-4 border border dark p-5">
   prikazani izdelki, ki smo jih narocili ter njihova kolicina
+<<<<<<< HEAD
   <?php
     $sql = "SELECT COUNT(*) FROM rso_cpu;";
     $rezultat=($db->query($sql));
@@ -139,6 +140,8 @@ session_start();
       
     }
   ?>
+=======
+>>>>>>> 5a6f74d2a55295b45e95714847eea4434beb1bb0
 </div>
 <div class="col-sm-1 border border dark p-5">
   
