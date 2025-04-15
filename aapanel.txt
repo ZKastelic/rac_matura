@@ -1,6 +1,6 @@
 aaPanel Internet Address: https://89.168.20.195:30800/281312b8
 aaPanel Internal Address: https://10.0.0.230:30800/281312b8
-username: wzc4yjwg
+username: [REDACTED]
 password: 64c2586c
 Warning:
 If you cannot access the panel,
