@@ -1,5 +1,17 @@
 <?php
 session_start();
+require_once('funkcije.php');
+require_once('db.php');
+
+// Pridobi vse izdelke iz košarice
+$sql = "SELECT * FROM kosarica";
+$rezultat = $db->query($sql);
+
+// Izračunaj skupni znesek
+$sql_total = "SELECT SUM(cena * kolicina) AS skupna_cena FROM kosarica";
+$total_result = $db->query($sql_total);
+$skupno = $total_result->fetch_assoc()['skupna_cena'];
+
 ?>
 
 <!DOCTYPE html>
@@ -7,185 +19,98 @@ session_start();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/c33e8f16b9.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="style.css">
-    <title>Search GPU</title>
-</head>
-<body>
-    
-<nav class="navbar navbar-expand-sm temno-siv text-light text-opacity-50 my-0 py-0 fs-6">
-        <div class="col d-flex justify-content-center">Samo danes 15% popusta na vse</div>
-        <div class="col d-flex justify-content-center"><a href="https://x.com/home" class="link-underline link-underline-opacity-0 link-secondary"><i class="fa-brands fa-x-twitter m-2"></i></a>
-        <a href="https://www.facebook.com/" class="link-underline link-underline-opacity-0 link-secondary"><i class="fa-brands fa-facebook m-2" href=""></i></a>
-        <a href="https://www.instagram.com/" class="link-underline link-underline-opacity-0 link-secondary"><i class="fa-brands fa-instagram m-2"></i></a></div>
-</nav>
-    
-    <nav class="navbar navbar-expand-sm siv">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#"></a>
-          <img src="slike/logo-seminarska.png" class="img-fluid" alt="Logo" style="width:100px;">
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-            <div class="collapse navbar-collapse" id="collapsibleNavbar">
-            <ul class="navbar-nav flex-row flex-wrap col-3">
-              <li class="nav-item">
-                <a class="nav-link text-dark" href="index.php">Home</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link text-dark" href="search_rac.php">Racunalniki</a>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Komponente</a>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="search_gpu.php">GPU</a></li>
-                  <li><a class="dropdown-item" href="search_cpu.php">CPU</a></li>
-                  <li><a class="dropdown-item" href="search_ram.php">RAM</a></li>
-                  <li><a class="dropdown-item" href="search_mobo.php">Maticne plosce</a></li>
-                </ul>
-              </li>
-            </ul>
-            <div class="col-6">
-              <form class="d-flex" method="get" action="iskanje.php">
-                <input class="form-control me-1" type="text" placeholder="Iskalnik" name="search">
-                  <button class="btn btn-secondary srednje-siv text-dark me-3 border-none" style="border: none;" type="submit">Search</button>
-              </form>
-            </div>
-            <ul class="navbar-nav flex-row flex-wrap ms-auto col-3">
-              
-            <li class="nav-item me-3">
-
-            <?php
-                require_once('db.php');
-                if(isset($_SESSION['username'])){
-                $username=$_SESSION['username'];
-                $sql = "SELECT ime FROM rso_prijava WHERE username = '$username' limit 1";
-                $rezultat=($db->query($sql));
-                $user=$rezultat->fetch_assoc();
-                echo '<p class="text-center mt-2">Pozdravljen '."$user[ime]".'</p>';
-                echo '<li class="nav-item">
-                <a class="nav-link text-dark px-2" href="logout.php"><i class="fa-solid fa-right-from-bracket"></i></a>
-                </li>';
-
-                }
-                else{
-                echo '<a class="nav-link text-dark" href="login.php">Login/Signup</a>';}
-                
-              ?>
-
-            </li>
-              <li class="nav-item px-2">
-                <a class="nav-link text-dark" href="shopping_cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
-              </li>
-            <?php
-              if(isset($_SESSION['username'])){
-                    
-                $username=$_SESSION['username'];
-                $geslo=$_SESSION['geslo'];
-                $sql = "SELECT ime FROM rso_prijava WHERE username = '$username' limit 1";
-                $rezultat=($db->query($sql));
-                $user=$rezultat->fetch_assoc();
-                if($username == 'zkas' and $geslo =='pass'){
-                  echo'<li class="nav-item">
-                      <div class="dropdown">
-                        <button type="button" class="btn dropdown-toggle srednje-siv" style="border: none;" data-bs-toggle="dropdown">
-                          Dodaj izdelke
-                        </button>
-                        <ul class="dropdown-menu">
-                          <li><a class="dropdown-item" href="dodaj_ram.php">Dodaj RAM</a></li>
-                          <li><a class="dropdown-item" href="dodaj_cpu.php">Dodaj CPU</a></li>
-                          <li><a class="dropdown-item" href="dodaj_mobo.php">Dodaj mobo</a></li>
-                          <li><a class="dropdown-item" href="dodaj_gpu.php">Dodaj GPU</a></li>
-                          <li><a class="dropdown-item" href="dodaj_rac.php">Dodaj Racunalnik</a></li>
-                        </ul>
-                      </div>
-                    </li>';
-                }
-              }
-            ?>
-            </ul>
-            <hr>
+    <style>
+        .card {
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            font-weight: bold;
             
+        }
+    </style>
+</head>
+<body class="d-flex flex-column min-vh-100">
+<?php echo Navbar(); ?>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header siv">
+                    Vaša košarica <!-- Naslov kartice -->
+                </div>
+                <div class="card-body svetlo-siv"> <!-- Telo kartice -->
+                    <?php if ($rezultat->num_rows > 0): ?> <!-- Če je v rezultatu vsaj ena vrstica (je izdelek v kosarici) -->
+                        <table class="table">
+                            <thead>
+                                <tr> <!-- Prikaže imena atributov -->
+                                    <th>Slika</th> 
+                                    <th>Izdelek</th>
+                                    <th>Količina</th>
+                                    <th>Cena</th>
+                                    <th>Skupaj</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php while ($user = $rezultat->fetch_assoc()): ?> <!-- Prikaže vse izdelke v kosarici -->
+                                    <?php
+                                    $sql1 = "SELECT * FROM $user[tabela] WHERE ime = '$user[ime]' LIMIT 1"; // Pridobi vse iz tabele, v kateri je izdelek iz kosarice osnovno
+                                    $rezultat1 = $db->query($sql1);
+                                    $user1 = $rezultat1->fetch_assoc();
+                                    ?>
+                                    <tr>
+                                        <td>
+                                            <a href="prikaz.php?id=<?php echo $user1['id']; ?>&num=<?php echo $user1['tip']; ?>" class="text-decoration-none text-body"> <!-- Povezava do prikaza izdelka, če uporabnik klikne na izdelek -->
+                                                <?php echo '<img alt="Product Image" class="img-fluid d-block mx-auto" style="width:70px" src="data:image/jpeg;base64,' . base64_encode($user1['slika1']) . '"/>'; ?> <!-- Prikaz slike izdelka -->
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <a href="prikaz.php?id=<?php echo $user1['id']; ?>&num=<?php echo $user1['tip']; ?>" class="text-decoration-none text-body"> <!-- Povezava do prikaza izdelka, če uporabnik klikne na izdelek -->
+                                                <?php echo htmlspecialchars($user['ime']); ?> <!-- Prikaz imena izdelka -->
+                                            </a>
+                                        </td>
+                                        <td><?php echo $user['kolicina']; ?></td> <!-- Prikaz količine izdelka -->
+                                        <td><?php echo number_format($user['cena'], 2); ?> €</td> <!-- Prikaz cene izdelka -->
+                                        <td><?php echo number_format($user['cena'] * $user['kolicina'], 2); ?> €</td> <!-- Prikaz skupne cene izdelka (cena * količina) -->
+                                        <td>
+                                            <form action="odstrani_iz_kosarice.php?id=<?php echo $user['id']?>" method="POST" class="d-inline"> <!-- Obrazec za odstranitev izdelka iz košarice in povezava do odstrani_iz_losarice.php -->
+                                                <button type="submit" class="btn btn-danger btn-sm">Odstrani</button> <!-- Gumb za odstranitev izdelka iz košarice -->
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <?php endwhile; ?>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="4">Skupno</th> <!-- Prikaz skupne cene -->
+                                    <th><?php echo number_format($skupno, 2); ?> €</th> <!-- Prikaz skupne cene z 2 decimalkami -->
+                                    <th></th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <div class="text-end">
+                            <a href="checkout.php" class="btn btn-success">Na blagajno</a> <!-- Povezava do blagajne (checkout.php) -->
+                        </div>
+                    <?php else: ?>
+                        <p class="text-center">Vaša košarica je prazna.</p> <!-- Prikaz sporočila, če je košarica prazna, če je stavek v vrstici 50 null -->
+                        <div class="text-center">
+                            <a href="index.php" class="btn btn-success">Nazaj v trgovino</a> <!-- Povezava do trgovine (index.php) -->
+                        </div>
+                    <?php endif; ?>
+                </div>
             </div>
-          </div>
         </div>
-    </nav>
-
-
-<div class="row w-100">
-<div class="col-sm-2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Aperiam obcaecati maxime nihil dolorum perferendis odio dolores hic enim illo architecto laudantium sit quibusdam, quidem quod totam delectus. Laborum, harum explicabo!</div>
-<div class="col-sm-4 border border dark p-5">
-  prikazani izdelki, ki smo jih narocili ter njihova kolicina
-<<<<<<< HEAD
-  <?php
-    $sql = "SELECT COUNT(*) FROM rso_cpu;";
-    $rezultat=($db->query($sql));
-    $user=$rezultat->fetch_assoc()["COUNT(*)"];
-    for($i=1; $i<$user+1; $i++){
-      
-      $sql1 = "SELECT slika1,ime FROM rso_cpu WHERE id= '$i' limit 1";
-      $rezultat1=($db->query($sql1));
-      $user1=$rezultat1->fetch_assoc();
-      echo"<a href='prikaz_cpu.php?id=$i' class='text-decoration-none text-body'>
-      <div class='row box my-3 py-3 border border-dark rounded'>
-      <div class='col-sm-4'>
-      <img src='$user1[slika1]' class='rounded' height='50'> 
-      </div>
-      <div class='col-sm-8'>$user1[ime]</div>
-      </div>
-      </a>
-      ";
-      
-    }
-  ?>
-=======
->>>>>>> 5a6f74d2a55295b45e95714847eea4434beb1bb0
-</div>
-<div class="col-sm-1 border border dark p-5">
-  
-</div>
-<div class="col-sm-3 border border dark p-5">
-  cash total, preusmerjenje na vpis shipping podatkov, nato na vnos placilnih podatkov, nato na potrdilo, da je bilo shippano
-</div>
-<div class="col-sm-2">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Aspernatur quidem et quisquam, dolore ab illum necessitatibus sit, distinctio quos, a quam fugiat dolorum animi. Facere cupiditate debitis fugit mollitia totam.</div>
-
-
-
-</div>
-
-
-<footer class="container-fluid siv border-top border-dark text-center pt-4 pb-0 mb-0 fixed-bottom">
-  <div class="row siv">
-    <div class="col-sm-3"></div>
-    <div class="col-sm-3"><img src="slike/logo-seminarska.png" style="max-height: 70px;"></div>
-    <div class="col-sm-3 d-flex align-items-center"><p class="text-center"><i class="fa-regular fa-copyright"></i> 11.2024 - 12.2024, Shopotron</p></div>
-    <div class="col-sm-3"></div>
-  </div>
-  <div class="row">
-    <div class="col-sm-3"></div>
-    <div class="col-sm-6"><hr></div>
-    <div class="col-sm-3"></div>
-
-
-  </div>
-
-  <div class="row siv">
-    <div class="col-sm-4"><h6>Contact us</h6></div>
-    <div class="col-sm-4 text-center"><h6>Poslovalnica</h6>
-      <ul class="text-center list-group-flush siv">
-        <li class="list-group-item siv">Solski center Novo mesto</li>
-        <li class="list-group-item siv">8000 Novo mesto</li>
-        <li class="list-group-item siv">Slovenija</li>
-      </ul>
     </div>
-    <div class="col-sm-4">
-      <img src="slike/mastercard.png" class="img-fluid" style="max-height: 70px;">
-      <img src="slike/visa.png" class="img-fluid"style="max-height: 70px;">
-      <img src="slike/flik.png" class="img-fluid"style="max-height: 70px;">
-    </div>
-  </div>
-</footer>
+</div>
+
+<?php echo Footer(); ?>
 </body>
 </html>

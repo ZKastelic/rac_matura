@@ -1,24 +1,25 @@
 <?php
-
     session_start();
-    if(!empty($_POST)){
+    if(!empty($_POST)){ // Preveri, če spremenljivka $_POST ni prazna
             
             require_once('db.php');
 
-            $username=$_POST['username'];
-            $geslo=$_POST['geslo'];
+            $username=$_POST['username']; // Uporabniško ime
+            $geslo=$_POST['geslo']; // Geslo
 
-            $sql="SELECT geslo FROM rso_prijava WHERE username='$username' LIMIT 1";
+            $sql="SELECT geslo FROM rso_prijava WHERE username='$username' LIMIT 1"; // SQL poizvedba za iskanje gesla
 
-            $rezultat=($db->query($sql));
-              $user = $rezultat->fetch_assoc();
-              $_SESSION['username']=$username;
-              $_SESSION['geslo']=$geslo;
-      
-              if ($user['geslo'] == $geslo) {
-                  header("Location: index.php");
-              } else {
-                  echo '<div class="alert alert-danger w-25 mx-auto text-center"> Napacno geslo, poskusite ponovno. </div>';
-              }
+            $rezultat=($db->query($sql)); // Izvedi SQL poizvedbo
+            $user = $rezultat->fetch_assoc();
+            
+            if ($user && $user['geslo'] == $geslo) { // Preveri, če je uporabnik najden in geslo pravilno
+                $_SESSION['username']=$username; // Shrani uporabniško ime v sejo
+                $_SESSION['geslo']=$geslo; // Shrani geslo v sejo
+                header("Location: index.php"); // Preusmeri na index.php
+            } else {
+                $_SESSION['error'] = 'Napacno uporabniško ime ali geslo, poskusite ponovno.'; // Shrani sporočilo o napaki v sejo
+                header("Location: login.php"); // Preusmeri na login.php
+                exit();
+            }
           }
 ?>

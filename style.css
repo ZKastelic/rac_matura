@@ -1,23 +1,49 @@
 .svetlo-siv{
-    background-color:#C4DAD2;
+    background-color:#dfede8; /* Svetlo zeleno ozadje */
 }
 
 .siv{
-    background-color: #6A9C89;
+    background-color: #6A9C89; /* zeleno ozadje */
 }
 
 .temno-siv{
-    background-color: #16423C;
+    background-color: #16423C; /* Temno zeleno ozadje */
 }
 
 .crn{
-    background-color: #191818;
+    background-color: #191818; /* Črno ozadje */
 }
 
 .srednje-siv{
-    background-color: #406f63;
+    background-color: #406f63; /* Srednje zeleno ozadje */
 }
 
 li a:hover {
-    background-color: #629584;
+    background-color: #189a5eab; /* Svetlo zeleno ozadje, ko uporabnik lebdi miško nad gumbom */
 }
+
+
+/* Spremeni barvo in velikost navigacijskih puščic v Bootstrap Carouselu */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: #4c4c4c; 
+  border-radius: 50%;
+}
+
+/* Spremeni barvo, ko uporabnik lebdi miško nad puščicami */
+.carousel-control-prev:hover .carousel-control-prev-icon,
+.carousel-control-next:hover .carousel-control-next-icon {
+  background-color: #4c4c4c; 
+}
+
+.btn.siv:hover {
+    background-color: #1c7754 !important; /* Svetlo zeleno ozadje */
+    color: rgb(0, 0, 0) !important; /* Črna barva besedila */
+}
+
+
+.btn-success:hover { /* Spremeni barvo gumba ob lebdenju miške */
+    background-color: #1c7754 !important; /* Darker green */
+    opacity: 0.9;
+}
+

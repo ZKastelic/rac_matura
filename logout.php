@@ -1,5 +1,5 @@
 <?php
-session_start();
-session_unset();
-header("Location: index.php");
+session_start(); // Začne sejo
+session_unset(); // Počisti vse spremenljivke seje
+header("Location: index.php"); // Preusmeri uporabnika na začetno stran
 ?>

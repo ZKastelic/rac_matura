@@ -1,5 +1,18 @@
 <?php
 session_start();
+require_once('funkcije.php');
+
+if (!empty($_POST)) { // Preveri, če so podatki poslani
+    $_SESSION['ime'] = $_POST['ime']; // Shranimo ime v sejo
+    $_SESSION['username'] = $_POST['username']; // Shranimo uporabniško ime v sejo
+    $_SESSION['geslo'] = $_POST['geslo']; // Shranimo geslo v sejo
+    $_SESSION['email'] = $_POST['email']; // Shranimo email v sejo
+    $_SESSION['spol'] = $_POST['spol']; // Shranimo spol v sejo
+    $koda = ustvariKodo(); // Ustvarimo kodo, uporabljeno za potrditev registracije
+    $_SESSION['koda'] = $koda; // Shranimo kodo v sejo
+    header("Location: confirm.php"); // Preusmerimo uporabnika na potrditev registracije
+    exit; // Preprečimo nadaljnje izvajanje skripte
+}
 ?>
 
 <!DOCTYPE html>
@@ -11,205 +24,69 @@ session_start();
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/c33e8f16b9.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .card {
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .card-header {
+            font-weight: bold;
+        }
+    </style>
     <title>Sign up</title>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
     
-<nav class="navbar navbar-expand-sm temno-siv text-light text-opacity-50 my-0 py-0 fs-6">
-        <div class="col d-flex justify-content-center">Samo danes 15% popusta na vse</div>
-        <div class="col d-flex justify-content-center"><a href="https://x.com/home" class="link-underline link-underline-opacity-0 link-secondary"><i class="fa-brands fa-x-twitter m-2"></i></a>
-        <a href="https://www.facebook.com/" class="link-underline link-underline-opacity-0 link-secondary"><i class="fa-brands fa-facebook m-2" href=""></i></a>
-        <a href="https://www.instagram.com/" class="link-underline link-underline-opacity-0 link-secondary"><i class="fa-brands fa-instagram m-2"></i></a></div>
-</nav>
-    
-    <nav class="navbar navbar-expand-sm siv">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#"></a>
-          <img src="slike/logo-seminarska.png" class="img-fluid" alt="Logo" style="width:100px;">
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-            <div class="collapse navbar-collapse" id="collapsibleNavbar">
-            <ul class="navbar-nav flex-row flex-wrap col-3">
-              <li class="nav-item">
-                <a class="nav-link text-dark" href="index.php">Home</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link text-dark" href="search_rac.php">Racunalniki</a>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Komponente</a>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="search_gpu.php">GPU</a></li>
-                  <li><a class="dropdown-item" href="search_cpu.php">CPU</a></li>
-                  <li><a class="dropdown-item" href="search_ram.php">RAM</a></li>
-                  <li><a class="dropdown-item" href="search_mobo.php">Maticne plosce</a></li>
-                </ul>
-              </li>
-            </ul>
-            <div class="col-6">
-              <form class="d-flex" method="get" action="iskanje.php">
-                <input class="form-control me-1" type="text" placeholder="Iskalnik" name="search">
-                  <button class="btn btn-secondary srednje-siv text-dark me-3 border-none" style="border: none;" type="submit">Search</button>
-              </form>
+<?php echo Navbar(); ?>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header siv">
+                    Registracija <!-- Naslov strani -->
+                </div>
+                <div class="card-body svetlo-siv">
+                    <form action="" method="post">
+                        <div class="mb-3">
+                            <label for="ime" class="form-label">Ime</label> <!-- Oznaka in polje za vnos imena -->
+                            <input type="text" class="form-control" name="ime" id="ime" placeholder="Vnesite ime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Uporabniško ime</label> <!-- Oznaka in polje za vnos uporabniškega imena, ki si ga je izbral uporabnik -->
+                            <input type="text" class="form-control" name="username" id="username" placeholder="Vnesite uporabniško ime" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="geslo" class="form-label">Geslo</label> <!-- Oznaka in polje za vnos gesla, ki si ga je uporabnik izbral -->
+                            <input type="password" class="form-control" name="geslo" id="geslo" placeholder="Vnesite geslo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label> <!-- Oznaka in polje za vnos emaila uporabnika -->
+                            <input type="email" class="form-control" name="email" id="email" placeholder="Vnesite email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Spol</label> <!-- Oznaka za izbiro spola -->
+                            <div>
+                                <input class="form-check-input" type="radio" name="spol" id="m" value="m" required> <!-- Izbira med moškim in ženskim spolom -->
+                                <label class="form-check-label" for="m">Moški</label>
+                            </div>
+                            <div>
+                                <input class="form-check-input" type="radio" name="spol" id="f" value="f" required>
+                                <label class="form-check-label" for="f">Ženski</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Registriraj se</button> <!-- Gumb za pošiljanje obrazca (za registracijo) -->
+                    </form>
+                    <hr>
+                    <p class="text-center">Že imate račun? <a href="login.php">Prijavite se</a></p> <!-- Povezava do prijave, če uporabnik že ima račun -->
+                </div>
             </div>
-            <ul class="navbar-nav flex-row flex-wrap ms-auto col-3">
-              
-            <li class="nav-item me-3">
-
-            <?php
-                require_once('db.php');
-                if(isset($_SESSION['username'])){
-                $username=$_SESSION['username'];
-                $sql = "SELECT ime FROM rso_prijava WHERE username = '$username' limit 1";
-                $rezultat=($db->query($sql));
-                $user=$rezultat->fetch_assoc();
-                echo '<p class="text-center mt-2">Pozdravljen '."$user[ime]".'</p>';
-                echo '<li class="nav-item">
-                <a class="nav-link text-dark px-2" href="logout.php"><i class="fa-solid fa-right-from-bracket"></i></a>
-                </li>';
-
-                }
-                else{
-                echo '<a class="nav-link text-dark" href="login.php">Login/Signup</a>';}
-                
-              ?>
-
-            </li>
-              <li class="nav-item px-2">
-                <a class="nav-link text-dark" href="shopping_cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
-              </li>
-            <?php
-              if(isset($_SESSION['username'])){
-                    
-                $username=$_SESSION['username'];
-                $geslo=$_SESSION['geslo'];
-                $sql = "SELECT ime FROM rso_prijava WHERE username = '$username' limit 1";
-                $rezultat=($db->query($sql));
-                $user=$rezultat->fetch_assoc();
-                if($username == 'zkas' and $geslo =='pass'){
-                  echo'<li class="nav-item">
-                      <div class="dropdown">
-                        <button type="button" class="btn dropdown-toggle srednje-siv" style="border: none;" data-bs-toggle="dropdown">
-                          Dodaj izdelke
-                        </button>
-                        <ul class="dropdown-menu">
-                          <li><a class="dropdown-item" href="dodaj_ram.php">Dodaj RAM</a></li>
-                          <li><a class="dropdown-item" href="dodaj_cpu.php">Dodaj CPU</a></li>
-                          <li><a class="dropdown-item" href="dodaj_mobo.php">Dodaj mobo</a></li>
-                          <li><a class="dropdown-item" href="dodaj_gpu.php">Dodaj GPU</a></li>
-                          <li><a class="dropdown-item" href="dodaj_rac.php">Dodaj Racunalnik</a></li>
-                        </ul>
-                      </div>
-                    </li>';
-                }
-              }
-            ?>
-            </ul>
-            <hr>
-            
-            </div>
-          </div>
         </div>
-    </nav>
-
-    <div class="row w-100">
-        <div class="col-sm-4"></div>
-        <div class="col-sm-4 py-5 mt-5 border border-dark-subtle rounded-3 siv">
-            <h3>Vpisi se za pridobitev popusta</h3>
-          <form action="" method="post">
-            <div class="form-floating my-3">
-                <input type="text" class="form-control" name="ime" placeholder="Ime">
-                <label for="ime">Ime</label>
-            </div>
-            <div class="form-floating mb-3">
-                <input type="text" class="form-control" name="username" placeholder="Username">
-                <label for="username">Uporabnisko ime</label>
-            </div>
-            <div class="form-floating mb-3">
-                <input type="password" class="form-control" name="geslo" placeholder="Geslo">
-                <label for="password">Geslo</label>
-            </div>
-            <div class="form-floating mb-3">
-                <input type="email" class="form-control" name="email" placeholder="Email">
-                <label for="email">Email</label>
-            </div>
-            <div class="form-check form-check-inline">
-                <p>Izberi spol:</p>
-                <input class="form-check-input" type="radio" name="spol" id="m" value="m">
-                <label class="form-check-label" for="m"> Moski </label>
-              </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="radio" name="spol" id="f" value="f">
-                <label class="form-check-label" for="f"> Zenski </label>
-            </div>
-            <br>
-            <button type="submit" class="btn srednje-siv mt-3"> Vpisi se</button>
-          </form>
-          <p class="pt-3">Ze imas racun?</p>
-          <button class="btn srednje-siv">
-          <a href="login.php" class="text-body text-decoration-none">Vpisi se</a>
-          </button>
-
-        </div>
-        <div class="col-sm-4"></div>
-
     </div>
-<?php
+</div>
 
-if(!empty($_POST)){
-    require_once('db.php');
+<?php echo footer(); ?>
 
-    $ime=$_POST['ime'];
-    $username=$_POST['username'];
-    $geslo=$_POST['geslo'];
-    $email=$_POST['email'];
-    $spol=$_POST['spol'];
-
-
-$sql="insert into rso_prijava (ime, username, geslo, email, spol) values ('$ime', '$username', '$geslo', '$email', '$spol')";
-
-if($db->query($sql)){
-    echo("vnos uspesen");
-    $_SESSION['username']=$username;
-    $_SESSION['geslo']=$geslo;
-}
-else    
-    echo("napaka");
-}
-?>
-
-
-    <footer class="container-fluid siv border-top border-dark p-3 text-center pt-4 pb-0 mb-0 mt-5">
-        <div class="row siv">
-          <div class="col-sm-3"></div>
-          <div class="col-sm-3"><img src="slike/logo-seminarska.png" style="max-height: 70px;"></div>
-          <div class="col-sm-3 d-flex align-items-center"><p class="text-center"><i class="fa-regular fa-copyright"></i> 11.2024 - 12.2024, Shopotron</p></div>
-          <div class="col-sm-3"></div>
-        </div>
-        <div class="row">
-          <div class="col-sm-3"></div>
-          <div class="col-sm-6"><hr></div>
-          <div class="col-sm-3"></div>
-      
-      
-        </div>
-      
-        <div class="row siv">
-          <div class="col-sm-4"><h6>Contact us</h6></div>
-          <div class="col-sm-4 text-center"><h6>Poslovalnica</h6>
-            <ul class="text-center list-group-flush siv">
-              <li class="list-group-item siv">Solski center Novo mesto</li>
-              <li class="list-group-item siv">8000 Novo mesto</li>
-              <li class="list-group-item siv">Slovenija</li>
-            </ul>
-          </div>
-          <div class="col-sm-4">
-            <img src="slike/mastercard.png" class="img-fluid" style="max-height: 70px;">
-            <img src="slike/visa.png" class="img-fluid"style="max-height: 70px;">
-            <img src="slike/flik.png" class="img-fluid"style="max-height: 70px;">
-          </div>
-        </div>
-      </footer>
 </body>
 </html>

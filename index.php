@@ -1,5 +1,16 @@
 <?php
 session_start();
+require_once('funkcije.php');
+
+if (isset($_SESSION['toast_success'])) {
+    echo '<div class="toast align-items-center text-bg-success border-0 show position-fixed bottom-0 end-0 m-3" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">' . htmlspecialchars($_SESSION['toast_success']) . '</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+          </div>';
+    unset($_SESSION['toast_success']);
+}
 ?>
 
 <!DOCTYPE html>
@@ -11,187 +22,79 @@ session_start();
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://kit.fontawesome.com/c33e8f16b9.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="style.css">
-    <title>Home</title>
+    <title>Shopotron - Home</title>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
+
+<?php echo Navbar(); ?>
+
+
+<div class="container-fluid text-white text-center py-5" style="background: url('slike/banner.jpg') no-repeat center center; background-size: cover;">
+    <h1 class="display-4">Dobrodošli v Shopotron</h1> <!-- Pozdrav uporabnika na spletno stran -->
+    <p class="lead">Trgovino za vse vaše računalniške potrebe</p> <!-- Kratek opis trgovine -->
+    <a href="search.php?num=5" class="btn btn-success">Začnite z nakupovanjem</a> <!-- Gumb za začetek nakupovanja, povezava do strani, kjer lahko uporabnik izbera računalnike -->
+</div>
+
+<div class="container my-5">
+    <background image="slike/bannner.jpg" class="img-fluid rounded mb-4" alt="Banner">
+    <h2 class="text-center mb-4">Naši najbolj prodajani izdelki</h2> <!-- Naslov sekcije -->
     
-<nav class="navbar navbar-expand-sm temno-siv text-light text-opacity-50 my-0 py-0 fs-6">
-        <div class="col d-flex justify-content-center">Samo danes 15% popusta na vse</div>
-        <div class="col d-flex justify-content-center"><a href="https://x.com/home" class="link-underline link-underline-opacity-0 link-secondary"><i class="fa-brands fa-x-twitter m-2"></i></a>
-        <a href="https://www.facebook.com/" class="link-underline link-underline-opacity-0 link-secondary"><i class="fa-brands fa-facebook m-2" href=""></i></a>
-        <a href="https://www.instagram.com/" class="link-underline link-underline-opacity-0 link-secondary"><i class="fa-brands fa-instagram m-2"></i></a></div>
-</nav>
-    
-    <nav class="navbar navbar-expand-sm siv">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#"></a>
-          <img src="slike/logo-seminarska.png" class="img-fluid" alt="Logo" style="width:100px;">
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-            <div class="collapse navbar-collapse" id="collapsibleNavbar">
-            <ul class="navbar-nav flex-row flex-wrap col-3">
-              <li class="nav-item">
-                <a class="nav-link text-dark" href="index.php">Home</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link text-dark" href="search_rac.php">Racunalniki</a>
-              </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Komponente</a>
-                <ul class="dropdown-menu">
-                  <li><a class="dropdown-item" href="search_gpu.php">GPU</a></li>
-                  <li><a class="dropdown-item" href="search_cpu.php">CPU</a></li>
-                  <li><a class="dropdown-item" href="search_ram.php">RAM</a></li>
-                  <li><a class="dropdown-item" href="search_mobo.php">Maticne plosce</a></li>
-                </ul>
-              </li>
-            </ul>
-            <div class="col-6">
-              <form class="d-flex" method="get" action="iskanje.php">
-                <input class="form-control me-1" type="text" placeholder="Iskalnik" name="search">
-                  <button class="btn btn-secondary srednje-siv text-dark me-3 border-none" style="border: none;" type="submit">Search</button>
-              </form>
-            </div>
-            <ul class="navbar-nav flex-row flex-wrap ms-auto col-3">
-              
-            <li class="nav-item me-3">
+    <div class="row justify-content-center">
+        <?php
+        $ze_obstaja_num = []; // Tabela v kateri bodo shranjena števila, ki so bila že izbrana (3 različne kategorije, s 3 različnimi izdelki)
+        $ze_obstaja_id = []; // Tabela v kateri bodo shranjeni id-ji, ki so bili že izbrani
+        for ($i = 0; $i < 3; $i++) { // Zanka, ki se ponovi 3-krat, da izbere 3 različne kategorije
+            do { // Generira naključno število med 1 in 6, dokler ne najde takega, ki še ni bilo izbrano
+                $num = rand(1, 6); // Naključno število med 1 in 6
+            } while (in_array($num, $ze_obstaja_num)); // Ensure the number is unique
+            $ze_obstaja_num[] = $num; // Doda število v tabelo, če je unikatno
 
-            <?php
-                require_once('db.php');
-                if(isset($_SESSION['username'])){
-                $username=$_SESSION['username'];
-                $sql = "SELECT ime FROM rso_prijava WHERE username = '$username' limit 1";
-                $rezultat=($db->query($sql));
-                $user=$rezultat->fetch_assoc();
-                echo '<p class="text-center mt-2">Pozdravljen '."$user[ime]".'</p>';
-                echo '<li class="nav-item">
-                <a class="nav-link text-dark px-2" href="logout.php"><i class="fa-solid fa-right-from-bracket"></i></a>
-                </li>';
-
-                }
-                else{
-                echo '<a class="nav-link text-dark" href="login.php">Login/Signup</a>';}
-                
-              ?>
-
-            </li>
-              <li class="nav-item px-2">
-                <a class="nav-link text-dark" href="shopping_cart.php"><i class="fa-solid fa-cart-shopping"></i></a>
-              </li>
-            <?php
-              if(isset($_SESSION['username'])){
-                    
-                $username=$_SESSION['username'];
-                $geslo=$_SESSION['geslo'];
-                $sql = "SELECT ime FROM rso_prijava WHERE username = '$username' limit 1";
-                $rezultat=($db->query($sql));
-                $user=$rezultat->fetch_assoc();
-                if($username == 'zkas' and $geslo =='pass'){
-                  echo'<li class="nav-item">
-                      <div class="dropdown">
-                        <button type="button" class="btn dropdown-toggle srednje-siv" style="border: none;" data-bs-toggle="dropdown">
-                          Dodaj izdelke
-                        </button>
-                        <ul class="dropdown-menu">
-                          <li><a class="dropdown-item" href="dodaj_ram.php">Dodaj RAM</a></li>
-                          <li><a class="dropdown-item" href="dodaj_cpu.php">Dodaj CPU</a></li>
-                          <li><a class="dropdown-item" href="dodaj_mobo.php">Dodaj mobo</a></li>
-                          <li><a class="dropdown-item" href="dodaj_gpu.php">Dodaj GPU</a></li>
-                          <li><a class="dropdown-item" href="dodaj_rac.php">Dodaj Racunalnik</a></li>
-                        </ul>
-                      </div>
-                    </li>';
-                }
-              }
-            ?>
-            </ul>
-            <hr>
+            $id = 1;
             
-            </div>
-          </div>
-        </div>
-    </nav>
-
-<div class="row w-100 p-3">
-  <div class="col-sm-2">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Voluptates officiis quos voluptate vel eligendi quod fugiat aperiam facilis assumenda autem! Iure quo magnam doloremque doloribus cumque eius minima placeat dolor. lorem</div>
-<div id="front-page" class="carousel slide col-sm-8" data-bs-ride="carousel">
-  <div class="carousel-indicators">
-    <button type="button" data-bs-target="#front-page" data-bs-slide-to="0" class="active"></button>
-    <button type="button" data-bs-target="#front-page" data-bs-slide-to="1"></button>
-    <button type="button" data-bs-target="#front-page" data-bs-slide-to="2"></button>
-  </div>
-
-  <div class="carousel-inner">
-    <div class="carousel-item active rounded">
-      <img src="slike/rtx-4090.jpg" class="img-fluid d-block mx-auto">
+            
+            switch ($num) {
+                case 1: $tabela = "rso_cpu"; break; // Izbere rso_cpu tabelo, če je število 1
+                case 2: $tabela = "rso_gpu"; break; // Izbere rso_gpu tabelo, če je število 2
+                case 3: $tabela = "rso_mobo"; break; // Izbere rso_mobo tabelo, če je število 3
+                case 4: $tabela = "rso_ram"; break; // Izbere rso_ram tabelo, če je število 4
+                case 5: $tabela = "rso_rac"; break; // Izbere rso_rac tabelo, če je število 5
+                case 6: $tabela = "rso_storage"; break; // Izbere rso_storage tabelo, če je število 6
+            }
+            $sql = "SELECT * FROM $tabela WHERE id = ?"; // SQL poizvedba, ki izbere vse podatke iz tabele, kjer je id enak naključno generiranemu id-ju
+            $stmt = $db->prepare($sql);
+            $stmt->bind_param("i", $id); // V poizvedbo pripne id
+            $stmt->execute(); // Izvrši poizvedbo
+            $rezultat = $stmt->get_result();
+            $user = $rezultat->fetch_assoc(); // Podatke shrani v spremenljivko $user
+            echo '
+            <div class="col-md-4 mb-4"> <!-- Ustvari nov stolpec za izdelek -->
+                <a href="prikaz.php?id=' . $id . '&num=' . $num . '" class="text-decoration-none text-dark"> <!-- Povezava do strani z izdelkom -->
+                    <div class="card h-100" style="max-height: 350px;"> <!-- Kartica izdelka, ki ga prikazujemo -->
+                        <img alt="Product Image" class="img-fluid d-block mx-auto" style="max-height: 150px; object-fit: contain;" src="data:image/jpg;base64,' . base64_encode($user['slika1']) . '"/> <!-- Prikaz slike izdelka -->
+                        <div class="card-body text-center">
+                            <h5 class="card-title text-truncate">' . htmlspecialchars($user['ime']) . '</h5> <!-- Prikaz imena izdelka -->
+                            <p class="card-text">$' . htmlspecialchars($user['cena']) . '</p> <!-- Prikaz cene izdelka -->
+                        </div>
+                    </div>
+                </a>
+            </div>';
+        }
+        ?>
     </div>
-    <div class="carousel-item">
-      <img src="slike/pc.png" class="img-fluid d-block mx-auto">
-    </div>
-    <div class="carousel-item">
-      <img src="slike/monitor.jpg" class="img-fluid d-block mx-auto">
-    </div>
-  </div>
-
-  <button class="carousel-control-prev w-60" type="button" data-bs-target="#front-page" data-bs-slide="prev">
-    <span class="carousel-control-prev-icon"></span>
-  </button>
-  <button class="carousel-control-next w-60" type="button" data-bs-target="#front-page" data-bs-slide="next">
-    <span class="carousel-control-next-icon"></span>
-  </button>
-</div>
-  <div class="col-sm-2">Lorem ipsum, dolor sit amet consectetur adipisicing elit. Animi eligendi repudiandae sunt fuga eveniet iste soluta reprehenderit omnis commodi voluptates iusto veritatis amet, aspernatur ex eaque, ipsam architecto tempore perspiciatis.</div>
-</div>
-<div class="row pt-5 w-100">
-  <div class="col-sm-2"></div>
-  <div class="col-sm-4 text-center"> <h6>ZAKAJ NAKUP PRI NAS?</h6> <hr>
-    <p>V tem poslu smo ze vec let, a najpomembneje je, da je avtor te spletne strani najboljsi racunalnicar, ki se mu ime zacne na Z- in konca na -iga ter priimek na K- in konca na -astelic (tudi edini a to trenutno ni pomembno.)
-      V primeru nezadovoljstva vam omogocamo vrnitev izdelka
-    </p>   
-  </div>
-  <div class="col-sm-4 text-center"> <h6>POPRAVILA RACUNALNIKOV</h6> <hr>
-    <p>Nudimo tudi popravila racunalnikov po najbojsi ceni, za napake pri popravljanju pa na vaso zalost nismo odgovorni, to je vas problem
-    </p>   
-  </div>
-  <div class="col-sm-2"></div>
 </div>
 
-<footer class="container-fluid siv border-top border-dark p-3 text-center py-4 pb-0 mb-0">
-  <div class="row siv">
-    <div class="col-sm-3"></div>
-    <div class="col-sm-3"><img src="slike/logo-seminarska.png" style="max-height: 70px;"></div>
-    <div class="col-sm-3 d-flex align-items-center"><p class="text-center"><i class="fa-regular fa-copyright"></i> 11.2024 - 12.2024, Shopotron</p></div>
-    <div class="col-sm-3"></div>
-  </div>
-  <div class="row">
-    <div class="col-sm-3"></div>
-    <div class="col-sm-6"><hr></div>
-    <div class="col-sm-3"></div>
-
-
-  </div>
-
-  <div class="row siv">
-    <div class="col-sm-4"><h6>Contact us</h6></div>
-    <div class="col-sm-4 text-center"><h6>Poslovalnica</h6>
-      <ul class="text-center list-group-flush siv">
-        <li class="list-group-item siv">Solski center Novo mesto</li>
-        <li class="list-group-item siv">8000 Novo mesto</li>
-        <li class="list-group-item siv">Slovenija</li>
-      </ul>
+<div class="container my-5">
+    <div class="row align-items-center"> <!-- Ustvari nov vrstico, ki bo vsebovala sliko in besedilo -->
+        <div class="col-md-12 text-center"> 
+            <h2>O Shopotronu</h2> <!-- Naslov sekcije -->
+            <p>Shopotron je sodobna spletna računalniška trgovina, ki združuje strast do tehnologije z vrhunsko uporabniško izkušnjo. Ponaša se z bogato ponudbo najnovejše računalniške opreme, komponent in dodatkov priznanih blagovnih znamk. Ne glede na to, ali sestavljate zmogljiv gaming računalnik,
+                nadgrajujete svoj delovni sistem ali iščete zanesljivo opremo za vsakodnevno uporabo – Shopotron je pravi naslov za vas. Kar Shopotron resnično loči od drugih, je predanost kakovosti, ugodnim cenam in hitri dostavi. Poleg tega je uporabniška podpora vedno na voljo za prijazno pomoč in strokovno svetovanje.
+                Nakupovanje je hitro, enostavno in varno – popolno za sodobne uporabnike, ki cenijo čas in učinkovitost. Shopotron ni le trgovina – je skupnost tehnoloških navdušencev, ki verjamejo v moč dobrega hardvera. Pridružite se tisočem zadovoljnih strank in odkrijte, zakaj je Shopotron ena najbolj zaupanja vrednih spletnih destinacij za računalniške navdušence.</p>
+        </div>  <!-- Kratek opis trgovine -->
     </div>
-    <div class="col-sm-4">
-      <img src="slike/mastercard.png" class="img-fluid" style="max-height: 70px;">
-      <img src="slike/visa.png" class="img-fluid"style="max-height: 70px;">
-      <img src="slike/flik.png" class="img-fluid"style="max-height: 70px;">
-    </div>
-  </div>
-</footer>
+</div>
 
-
-
-
+<?php echo footer(); ?>
 
 </body>
 </html>

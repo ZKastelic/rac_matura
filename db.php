@@ -1,8 +1,8 @@
 <?php
-    define('DB_URL','88.200.86.10');
-    define('DB_NAME','2024_TA_06');
-    define('DB_PASS','C5JEYbXtj');
-    define ('DB_DB','2024_TA_06');
+    define('DB_URL','127.0.0.1');  //url baze
+    define('DB_NAME','rac_matura'); //ime baze
+    define('DB_PASS','GJ6hWDKjpJN2kFmw'); //geslo za dostop do baze
+    define ('DB_DB','rac_matura'); //ime baze znotraj povezave
 
     $db=new mysqli(DB_URL,DB_NAME, DB_PASS, DB_DB);
 ?>
