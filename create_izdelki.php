@@ -7,7 +7,7 @@
     );";
 
     if($db->query($sql))
-        echo("Tabela zidelki je bila uspesno ustvarjena.<br>");
+        echo("Tabela idelki je bila uspesno ustvarjena.<br>");
     else
         echo("Napaka pri ustvarjanju tabele.<br>");
 
