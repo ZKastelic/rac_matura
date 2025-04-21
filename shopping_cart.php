@@ -3,6 +3,41 @@ session_start();
 require_once('funkcije.php');
 require_once('db.php');
 
+// Preveri, če je uporabnik prijavljen
+if (!isset($_SESSION['username'])) {
+    echo '
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="style.css">
+        <title>Shopping Cart</title>
+    </head>
+    <body class="d-flex flex-column min-vh-100">
+        ' . Navbar() . '
+        <div class="container py-5">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div class="card text-center">
+                        <div class="card-header bg-danger text-white">
+                            Dostop zavrnjen
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">Za dostop do košarice se morate prijaviti.</p>
+                            <a href="login.php" class="btn btn-primary">Prijavite se</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        ' . Footer() . '
+    </body>
+    </html>';
+    exit;
+}
+
 // Pridobi vse izdelke iz košarice
 $sql = "SELECT * FROM kosarica";
 $rezultat = $db->query($sql);
