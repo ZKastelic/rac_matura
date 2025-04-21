@@ -197,7 +197,9 @@ require_once('db.php'); // Zagotovi povezavo do podatkovne baze
                         id_GPU INT DEFAULT 0,
                         id_mobo INT DEFAULT 0,
                         id_ram INT DEFAULT 0,
-                        id_storage INT DEFAULT 0
+                        id_storage INT DEFAULT 0,
+                        id_kupca INT
+                        FOREIGN KEY (id_kupca) REFERENCES rso_prijava(id) 
                         );";
                     
             if($db->query($sql))

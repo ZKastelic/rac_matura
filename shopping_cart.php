@@ -12,6 +12,8 @@ if (!isset($_SESSION['username'])) {
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://kit.fontawesome.com/c33e8f16b9.js" crossorigin="anonymous"></script>
         <link rel="stylesheet" href="style.css">
         <title>Shopping Cart</title>
     </head>
@@ -38,13 +40,28 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-// Pridobi vse izdelke iz košarice
-$sql = "SELECT * FROM kosarica";
-$rezultat = $db->query($sql);
+$sql = "SELECT * FROM rso_prijava WHERE username = ?"; // Fixed SQL syntax
+$stmt = $db->prepare($sql); // Prepare SQL query
+$stmt->bind_param("s", $_SESSION['username']); // Bind username parameter
+$stmt->execute(); // Execute SQL query
+$u = $stmt->get_result(); // Get query result
+$user = $u->fetch_assoc(); // Fetch user data
 
-// Izračunaj skupni znesek
-$sql_total = "SELECT SUM(cena * kolicina) AS skupna_cena FROM kosarica";
-$total_result = $db->query($sql_total);
+$id_kupca = $user['id']; // Predpostavimo, da je ID uporabnika shranjen v seji
+
+// Pridobi vse izdelke iz košarice za trenutnega uporabnika
+$sql = "SELECT * FROM kosarica WHERE id_kupca = ?";
+$stmt = $db->prepare($sql);
+$stmt->bind_param("i", $id_kupca);
+$stmt->execute();
+$rezultat = $stmt->get_result();
+
+// Izračunaj skupni znesek za trenutnega uporabnika
+$sql_total = "SELECT SUM(cena * kolicina) AS skupna_cena FROM kosarica WHERE id_kupca = ?";
+$stmt_total = $db->prepare($sql_total);
+$stmt_total->bind_param("i", $id_kupca);
+$stmt_total->execute();
+$total_result = $stmt_total->get_result();
 $skupno = $total_result->fetch_assoc()['skupna_cena'];
 
 ?>
@@ -95,10 +112,19 @@ $skupno = $total_result->fetch_assoc()['skupna_cena'];
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php while ($user = $rezultat->fetch_assoc()): ?> <!-- Prikaže vse izdelke v kosarici -->
-                                    <?php
-                                    $sql1 = "SELECT * FROM $user[tabela] WHERE ime = '$user[ime]' LIMIT 1"; // Pridobi vse iz tabele, v kateri je izdelek iz kosarice osnovno
-                                    $rezultat1 = $db->query($sql1);
+                                <?php while ($user = $rezultat->fetch_assoc()): //Prikaže vse izdelke v kosarici
+                                    $tabela = $user['tabela']; // Pridobi ime tabele iz košarice
+
+                                    // Validate and sanitize the table name
+                                    $allowed_tables = ['rso_cpu', 'rso_gpu', 'rso_ram', 'rso_storage', 'rso_mobo']; // List of allowed table names
+                                    if (!in_array($tabela, $allowed_tables)) {
+                                        throw new Exception("Invalid table name: " . htmlspecialchars($tabela));
+                                    }
+                                    $sql1 = "SELECT * FROM $tabela WHERE ime = ? LIMIT 1"; // Pridobi vse podatke o izdelku iz tabele, ki jo je uporabnik dodal v košarico
+                                    $stmt1 = $db->prepare($sql1);
+                                    $stmt1->bind_param("s", $user['ime']);
+                                    $stmt1->execute();
+                                    $rezultat1 = $stmt1->get_result();
                                     $user1 = $rezultat1->fetch_assoc();
                                     ?>
                                     <tr>

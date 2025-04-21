@@ -11,8 +11,10 @@ if (!isset($_SESSION['username'])) {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="style.css">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://kit.fontawesome.com/c33e8f16b9.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="style.css">
         <title>PC Builder</title>
     </head>
     <body class="d-flex flex-column min-vh-100">
@@ -38,50 +40,67 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
+$sql = "SELECT * FROM rso_prijava WHERE username = ?"; // Fixed SQL syntax
+$stmt = $db->prepare($sql); // Prepare SQL query
+$stmt->bind_param("s", $_SESSION['username']); // Bind username parameter
+$stmt->execute(); // Execute SQL query
+$u = $stmt->get_result(); // Get query result
+$user = $u->fetch_assoc(); // Fetch user data
+
+$id_kupca = $user['id']; // Predpostavimo, da je ID uporabnika shranjen v seji
+
+// Pridobi zadnji vnos iz tabele pcbuild za trenutnega uporabnika
+$pc_sql = "SELECT * FROM pcbuild WHERE id_kupca = ? ORDER BY id DESC LIMIT 1";
+$stmt = $db->prepare($pc_sql);
+$stmt->bind_param("i", $id_kupca);
+$stmt->execute();
+$pc = $stmt->get_result();
+$pc_user = $pc->fetch_assoc();
+
+if (!$pc_user) {
+    $sql = "INSERT INTO pcbuild (id_kupca) VALUES (?)"; // Ustvari nov vnos v tabeli pcbuild
+    $stmt = $db->prepare($sql);
+    $stmt->bind_param("i", $id_kupca); // Bind parameter
+    $stmt->execute(); // Izvede poizvedbo
+}
+
 header("Cache-Control: no-cache, must-revalidate");
 header("Expires: 0");
 $id_strani = $_GET['id'] ?? null; // Dobimo id strani iz URL-ja
-$socket =''; // Inicializiramo spremenljivko za socket
-$ddr =''; //npr. DDR4, rso_ram 
+$socket = $pc_user['socket'] ?? ''; // Initialize $socket with a value from $pc_user or empty string
+$ddr = $pc_user['ddr'] ?? ''; // Initialize $ddr with a value from $pc_user or empty string
+
 //CPU arhitektura = mobo Socket
 $ddr5 = ['AM5', 'sTR5', 'LGA1700', 'LGA1851', 'LGA4677']; // Določimo kateri socketi podpirajo DDR5
 $ddr4 = ['AM4', 'sTR4', 'LGA1200', 'LGA1700', 'LGA2066', 'LGA4677']; // Določimo kateri socketi podpirajo DDR4
 $ddr3 = ['AM3', 'FM1', 'FM2', 'FM2+', 'G34', 'C32', 'LGA775', 'LGA1156', 'LGA1366', 'LGA1155', 'LGA2011']; // Določimo kateri socketi podpirajo DDR3
 
-if($socket != ''){ // Preverimo ali je socket prazen
-    if(in_array($socket, $ddr5)){ // Preverimo ali je socket v seznamu ddr5
-        $ram_sql= "SELECT * FROM rso_ram WHERE generacija LIKE 'DDR5'"; // Če je, izvedemo poizvedbo za DDR5  
+if ($socket !== '') { // Check if $socket is not empty
+    if (in_array($socket, $ddr5)) {
+        $ram_sql = "SELECT * FROM rso_ram WHERE generacija LIKE 'DDR5'";
+    } elseif (in_array($socket, $ddr4)) {
+        $ram_sql = "SELECT * FROM rso_ram WHERE generacija LIKE 'DDR4'";
+    } elseif (in_array($socket, $ddr3)) {
+        $ram_sql = "SELECT * FROM rso_ram WHERE generacija LIKE 'DDR3'";
     }
-    if(in_array($socket, $ddr5)){ // Preverimo ali je socket v seznamu ddr4
-        $ram_sql= "SELECT * FROM rso_ram WHERE generacija LIKE 'DDR4'"; // Če je, izvedemo poizvedbo za DDR4 
-    }
-    if(in_array($socket, $ddr5)){ // Preverimo ali je socket v seznamu ddr3
-        $ram_sql= "SELECT * FROM rso_ram WHERE generacija LIKE 'DDR3'"; // Če je, izvedemo poizvedbo za DDR3
-    }
-}
-else{
-    $ram_sql= "SELECT * FROM rso_ram"; // Če socket ni določen, izvedemo poizvedbo za vse ram modele
+} else {
+    $ram_sql = "SELECT * FROM rso_ram"; // Default query for all RAM models
 }
 
-
-
-if($ddr != ''){ // Preverimo ali je ddr prazen
-    if($ddr == 'DDR5'){ // Preverimo ali je ddr enak DDR5
-        $cpu_sql= "SELECT * FROM rso_cpu WHERE arhitektura IN $ddr5"; // Če je izvedemo poizvedbo za DDR5 v rso_cpu in rso_mobo
-        $mobo_sql= "SELECT * FROM rso_mobo WHERE socket IN $ddr5";
+if ($ddr !== '') { // Check if $ddr is not empty
+    if ($ddr === 'DDR5') {
+        $cpu_sql = "SELECT * FROM rso_cpu WHERE arhitektura IN ('" . implode("','", $ddr5) . "')";
+        $mobo_sql = "SELECT * FROM rso_mobo WHERE socket IN ('" . implode("','", $ddr5) . "')";
+    } elseif ($ddr === 'DDR4') {
+        $cpu_sql = "SELECT * FROM rso_cpu WHERE arhitektura IN ('" . implode("','", $ddr4) . "')";
+        $mobo_sql = "SELECT * FROM rso_mobo WHERE socket IN ('" . implode("','", $ddr4) . "')";
+    } elseif ($ddr === 'DDR3') {
+        $cpu_sql = "SELECT * FROM rso_cpu WHERE arhitektura IN ('" . implode("','", $ddr3) . "')";
+        $mobo_sql = "SELECT * FROM rso_mobo WHERE socket IN ('" . implode("','", $ddr3) . "')";
     }
-    if($ddr == 'DDR4'){ // Preverimo ali je ddr enak DDR4
-        $cpu_sql= "SELECT * FROM rso_cpu WHERE arhitektura IN $ddr4"; // Če je izvedemo poizvedbo za DDR4 v rso_cpu in rso_mobo
-        $mobo_sql= "SELECT * FROM rso_mobo WHERE socket IN $ddr4";
-    }
-    if($ddr == 'DDR3'){ // Preverimo ali je ddr enak DDR3
-        $cpu_sql= "SELECT * FROM rso_cpu WHERE arhitektura IN $ddr3"; // Če je izvedemo poizvedbo za DDR3 v rso_cpu in rso_mobo
-        $mobo_sql= "SELECT * FROM rso_mobo WHERE socket IN $ddr3";
-    }
-}
-else{
-    $cpu_sql= "SELECT * FROM rso_cpu"; // Če ddr ni določen, izvedemo poizvedbo za vse cpu modele
-    $mobo_sql= "SELECT * FROM rso_mobo"; // Če ddr ni določen, izvedemo poizvedbo za vse mobo modele
+} else {
+    $cpu_sql = "SELECT * FROM rso_cpu"; // Default query for all CPU models
+    $mobo_sql = "SELECT * FROM rso_mobo"; // Default query for all motherboard models
 }
 
 $shramba_sql= "SELECT * FROM rso_storage"; // Izvedemo poizvedbo za vse shrambe
@@ -93,18 +112,12 @@ $cpu = $db->query($cpu_sql);
 $shramba = $db->query($shramba_sql);
 $gpu = $db->query($gpu_sql);
 
-
 // Pridobi zadnji vnos iz tabele pcbuild
-$pc_sql = "SELECT * FROM pcbuild ORDER BY id DESC LIMIT 1"; // SQL poizvedba
-$pc = $db->query($pc_sql);
-$pc_user = $pc->fetch_assoc();
 $id_cpu = $pc_user['id_CPU'] ?? null; // Pridobi id CPU iz zadnjega vnosa
 $id_gpu = $pc_user['id_GPU'] ?? null; // Pridobi id GPU iz zadnjega vnosa
 $id_mobo = $pc_user['id_mobo'] ?? null; // Pridobi id mobo iz zadnjega vnosa
 $id_ram = $pc_user['id_ram'] ?? null; // Pridobi id ram iz zadnjega vnosa
 $id_storage = $pc_user['id_storage'] ?? null; // Pridobi id storage iz zadnjega vnosa
-
-
 
 // Preverimo katere komponente so že izbrane
 $ima_cpu = !empty($id_cpu);

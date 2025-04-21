@@ -10,7 +10,9 @@ if ($tableExists->num_rows == 0) {
             slika VARCHAR(50),
             cena INT,
             zaloga INT,
-            kolicina INT
+            kolicina INT,
+            id_kupca INT,
+            FOREIGN KEY (id_kupca) REFERENCES rso_prijava(id)
     );";
 
     if ($db->query($sql)) {
@@ -19,8 +21,10 @@ if ($tableExists->num_rows == 0) {
         echo "Napaka pri ustvarjanju tabele: " . $db->error . "<br>"; //Pove da je prišlo do napake pri ustvarjanju tabele
     }
 }
-    // Ustvari piškotek, ki traja 1 dan
-    $cookie_name = "kosarica"; //ime piškotka
-    $cookie_value = "kosarica"; //vrednost piškotka
-    setcookie($cookie_name, $cookie_value, time() + (86400), "/"); //Ustvari piškotek, tranjanje piškotka, 86400 = 1 dan
-    ?>
+
+// Ensure the shopping cart is associated with the logged-in user
+$id_kupca = $_SESSION['user_id']; // Predpostavimo, da je ID uporabnika shranjen v seji
+$cookie_name = "kosarica"; //ime piškotka
+$cookie_value = "kosarica_$id_kupca"; // Unique value for each user
+setcookie($cookie_name, $cookie_value, time() + (86400), "/"); //Ustvari piškotek, tranjanje piškotka, 86400 = 1 dan
+?>

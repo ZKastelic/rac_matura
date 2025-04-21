@@ -16,22 +16,34 @@ switch ($id_strani) {
     case 6: $ime = 'id_storage'; break; // dodajamo shrambo
 }
 
-// Preveri, če že obstaja kakšen zapis v tabeli pcbuild
-$sql = "SELECT id FROM pcbuild ORDER BY id DESC LIMIT 1";
-$rezultat = $db->query($sql);
+$sql = "SELECT * FROM rso_prijava WHERE username = ?"; // Fixed SQL syntax
+$stmt = $db->prepare($sql); // Prepare SQL query
+$stmt->bind_param("s", $_SESSION['username']); // Bind username parameter
+$stmt->execute(); // Execute SQL query
+$u = $stmt->get_result(); // Get query result
+$user = $u->fetch_assoc(); // Fetch user data
+
+$id_kupca = $user['id']; // Predpostavimo, da je ID uporabnika shranjen v seji
+
+// Preveri, če že obstaja kakšen zapis v tabeli pcbuild za trenutnega uporabnika
+$sql = "SELECT id FROM pcbuild WHERE id_kupca = ? ORDER BY id DESC LIMIT 1";
+$stmt_check = $db->prepare($sql);
+$stmt_check->bind_param("i", $id_kupca);
+$stmt_check->execute();
+$rezultat = $stmt_check->get_result();
 
 if ($rezultat->num_rows > 0) {
-    //Posodobi že obstoječ zapis, to naredi z pripravljanjem sql stavka, da se izognemo SQL injekciji
+    // Posodobi že obstoječ zapis za trenutnega uporabnika
     $pc = $rezultat->fetch_assoc();
     $pc_id = $pc['id'];
-    $sql = "UPDATE pcbuild SET $ime = ? WHERE id = ?"; // sql stavek za posodabljanje tabele pcbuild
+    $sql = "UPDATE pcbuild SET $ime = ? WHERE id = ?";
     $stmt = $db->prepare($sql);
     $stmt->bind_param("ii", $id, $pc_id);
 } else {
-    // Ustvari nov zapis, to naredi z pripravljanjem sql stavka, da se izognemo SQL injekciji
-    $sql = "INSERT INTO pcbuild ($ime) VALUES (?)";
+    // Ustvari nov zapis za trenutnega uporabnika
+    $sql = "INSERT INTO pcbuild ($ime, id_kupca) VALUES (?, ?)";
     $stmt = $db->prepare($sql);
-    $stmt->bind_param("i", $id);
+    $stmt->bind_param("ii", $id, $id_kupca);
 }
 
 // Izvede SQL stavek, ki je izbran zgoraj
